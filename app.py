@@ -61,8 +61,38 @@ def add_libro():
 
     return jsonify({"message": "Libro agregado con éxito"}), 201
 
+@app.route('/libros/<string:codigo>', methods=['DELETE'])
+def delete_libro(codigo):
+    conn = db_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM libro WHERE codigo = ?", (codigo,))
+    conn.commit()
+    conn.close()
+    
+    return jsonify({"message": f"Libro con código {codigo} eliminado"}), 200
+
+@app.route('/libros/<string:codigo>', methods=['PUT'])
+def update_libro(codigo):
+    update_data = request.json
+    nombre = update_data.get('nombre')
+    autor = update_data.get('autor')
+    editorial = update_data.get('editorial')
+    imagen = update_data.get('imagen')
+
+    conn = db_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        UPDATE libro 
+        SET nombre = ?, autor = ?, editorial = ?, imagen = ?
+        WHERE codigo = ?
+    """, (nombre, autor, editorial, imagen, codigo))
+    conn.commit()
+    conn.close()
+
+    return jsonify({"message": f"Libro con código {codigo} actualizado"}), 200
+
 # Ejecutar el programa
 if __name__ == "__main__":
     init_db()  # Crear base de datos y tablas al iniciar
     port = int(os.environ.get("PORT", 5000))  # Render asigna un puerto dinámico
-    app.run(host="0.0.0.0", port=port)  # Flask escucha en 0.0.0.0
+    app.run(host="0.0.0.0", port=port)  # Flask escucha en 0.0.0.0app.py
