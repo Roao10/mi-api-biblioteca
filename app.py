@@ -91,8 +91,21 @@ def update_libro(codigo):
 
     return jsonify({"message": f"Libro con código {codigo} actualizado"}), 200
 
+@app.route('/libros/<string:codigo>', methods=['GET'])
+def get_libro_por_codigo(codigo):
+    conn = db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM libro WHERE codigo = ?", (codigo,))
+    libro = cursor.fetchone()
+    conn.close()
+
+    if libro:
+        return jsonify(dict(libro)), 200
+    else:
+        return jsonify({"message": f"No se encontró un libro con el código {codigo}"}), 404
+
 # Ejecutar el programa
 if __name__ == "__main__":
     init_db()  # Crear base de datos y tablas al iniciar
     port = int(os.environ.get("PORT", 5000))  # Render asigna un puerto dinámico
-    app.run(host="0.0.0.0", port=port)  # Flask escucha en 0.0.0.0app.py
+    app.run(host="0.0.0.0", port=port)  # Flask escucha en 0.0.0.0
